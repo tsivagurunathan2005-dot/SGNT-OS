@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGNT OS — Your Life, Organized.</title>
+<style>
+  :root{
+    --bg:#F5F6FA;
+    --surface:#FFFFFF;
+    --text:#1A1B25;
+    --text-secondary:#6B7280;
+    --border:rgba(0,0,0,0.08);
+    --blue:#3B82F6;
+    --purple:#8B5CF6;
+    --cyan:#06B6D4;
+    --green:#10B981;
+    --amber:#FBBF24;
+    --coral:#FB7185;
+    --radius:16px;
+    --radius-sm:10px;
+  }
+  [data-theme="dark"]{
+    --bg:#0F1117;
+    --surface:#181B25;
+    --text:#F3F4F6;
+    --text-secondary:#9CA3AF;
+    --border:rgba(255,255,255,0.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    transition:background .3s ease, color .3s ease;
+    min-height:100vh;
+  }
+  a{color:inherit; text-decoration:none;}
+
+  /* Sidebar */
+  .layout{display:flex; min-height:100vh;}
+  .sidebar{
+    width:230px; flex-shrink:0;
+    background:var(--surface);
+    border-right:1px solid var(--border);
+    padding:24px 16px;
+    display:flex; flex-direction:column; gap:8px;
+    position:sticky; top:0; height:100vh;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    padding:8px 12px 24px;
+    font-weight:700; font-size:18px;
+  }
+  .logo .dot{
+    width:32px; height:32px; border-radius:10px;
+    background:linear-gradient(135deg,var(--blue),var(--purple));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:14px; font-weight:700;
+  }
+  .nav-item{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 12px; border-radius:var(--radius-sm);
+    font-size:14px; font-weight:500; color:var(--text-secondary);
+    cursor:pointer; transition:all .2s ease;
+  }
+  .nav-item:hover{background:var(--bg); color:var(--text);}
+  .nav-item.active{
+    background:linear-gradient(135deg, rgba(59,130,246,0.12), rgba(139,92,246,0.12));
+    color:var(--blue);
+  }
+  .nav-icon{width:20px; text-align:center;}
+
+  /* Main */
+  .main{flex:1; padding:24px 32px; max-width:1200px;}
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:24px;
+  }
+  .greeting h1{font-size:24px; font-weight:700; margin-bottom:4px;}
+  .greeting p{font-size:13px; color:var(--text-secondary);}
+  .theme-toggle{
+    display:flex; align-items:center; gap:8px;
+    padding:8px 16px; border-radius:999px;
+    background:var(--surface); border:1px solid var(--border);
+    cursor:pointer; font-size:13px; font-weight:500;
+    transition:all .2s ease;
+  }
+  .theme-toggle:hover{transform:scale(1.03);}
+
+  /* Stats row */
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+    margin-bottom:24px;
+  }
+  .stat-card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:18px 20px;
+    transition:transform .2s ease;
+  }
+  .stat-card:hover{transform:translateY(-2px);}
+  .stat-card .label{font-size:12px; color:var(--text-secondary); margin-bottom:6px;}
+  .stat-card .value{font-size:24px; font-weight:700;}
+  .stat-card .bar{height:6px; border-radius:3px; background:var(--bg); margin-top:10px; overflow:hidden;}
+  .stat-card .bar-fill{height:100%; border-radius:3px;}
+
+  /* Grid */
+  .grid{display:grid; grid-template-columns:1.4fr 1fr; gap:20px;}
+  .col{display:flex; flex-direction:column; gap:20px;}
+  .card{
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--radius); padding:20px;
+  }
+  .card-title{display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;}
+  .card-title h3{font-size:15px; font-weight:600;}
+  .card-title .icon{font-size:16px; opacity:.7;}
+
+  .add-btn{
+    border:none; background:linear-gradient(135deg,var(--blue),var(--purple));
+    color:#fff; font-size:12px; font-weight:600; padding:6px 12px;
+    border-radius:999px; cursor:pointer; transition:transform .15s ease;
+  }
+  .add-btn:active{transform:scale(0.95);}
+
+  /* Task list */
+  .task{
+    display:flex; align-items:center; gap:10px;
+    padding:10px 0; border-bottom:1px solid var(--border);
+    font-size:14px;
+  }
+  .task:last-child{border-bottom:none;}
+  .task input{width:18px; height:18px; accent-color:var(--blue); cursor:pointer;}
+  .task.done span{text-decoration:line-through; color:var(--text-secondary);}
+
+  /* Goal progress */
+  .goal{margin-bottom:14px;}
+  .goal:last-child{margin-bottom:0;}
+  .goal-head{display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;}
+  .goal-head span:last-child{color:var(--text-secondary);}
+  .goal-bar{height:7px; border-radius:4px; background:var(--bg); overflow:hidden;}
+  .goal-bar-fill{height:100%; border-radius:4px;}
+
+  /* Habit */
+  .habit{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:8px 0; font-size:13px;
+  }
+  .habit-left{display:flex; align-items:center; gap:10px;}
+  .habit input{width:18px; height:18px; accent-color:var(--green); cursor:pointer;}
+  .streak{
+    font-size:11px; font-weight:600; color:var(--amber);
+    background:rgba(251,191,36,0.12); padding:3px 8px; border-radius:999px;
+  }
+
+  /* Reminders */
+  .reminder{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:9px 0; border-bottom:1px solid var(--border); font-size:13px;
+  }
+  .reminder:last-child{border-bottom:none;}
+  .reminder .time{color:var(--text-secondary); font-size:12px;}
+
+  /* Finance */
+  .finance-row{display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px;}
+  .finance-bar{height:8px; border-radius:4px; background:var(--bg); overflow:hidden; margin-bottom:8px;}
+  .finance-bar-fill{height:100%; border-radius:4px; background:linear-gradient(90deg,var(--cyan),var(--blue));}
+  .finance-note{font-size:12px; color:var(--text-secondary);}
+
+  /* AI card */
+  .ai-card{
+    background:linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08));
+    border:1px solid var(--border); border-radius:var(--radius); padding:20px;
+  }
+  .ai-head{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .ai-avatar{
+    width:34px; height:34px; border-radius:50%;
+    background:linear-gradient(135deg,var(--blue),var(--cyan));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:16px;
+    animation:pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(59,130,246,0.4);}
+    50%{box-shadow:0 0 0 8px rgba(59,130,246,0);}
+  }
+  .ai-card p{font-size:13px; color:var(--text-secondary); margin-bottom:14px; line-height:1.6;}
+  .ai-btn{
+    border:none; background:linear-gradient(135deg,var(--blue),var(--purple));
+    color:#fff; font-size:13px; font-weight:600; padding:10px 18px;
+    border-radius:999px; cursor:pointer; width:100%; transition:transform .15s ease;
+  }
+  .ai-btn:active{transform:scale(0.97);}
+
+  /* Responsive */
+  @media (max-width:900px){
+    .sidebar{display:none;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="dot">S</div>
+      <span>SGNT OS</span>
+    </div>
+    <div class="nav-item active"><span class="nav-icon">⌂</span>Dashboard</div>
+    <div class="nav-item"><span class="nav-icon">🔒</span>Vault</div>
+    <div class="nav-item"><span class="nav-icon">🖼</span>Media Vault</div>
+    <div class="nav-item"><span class="nav-icon">🗓</span>Planner</div>
+    <div class="nav-item"><span class="nav-icon">⏰</span>Reminders</div>
+    <div class="nav-item"><span class="nav-icon">📓</span>Knowledge Hub</div>
+    <div class="nav-item"><span class="nav-icon">💰</span>Finance</div>
+    <div class="nav-item"><span class="nav-icon">❤</span>Health</div>
+    <div class="nav-item"><span class="nav-icon">✨</span>Memory Center</div>
+    <div class="nav-item"><span class="nav-icon">🤖</span>AI Assistant</div>
+    <div class="nav-item"><span class="nav-icon">⚙</span>Settings</div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="greeting">
+        <h1 id="greetText">Good evening, Siva</h1>
+        <p>Here's your life, organized for today.</p>
+      </div>
+      <div class="theme-toggle" id="themeToggle">
+        <span id="themeIcon">🌙</span>
+        <span id="themeLabel">Dark mode</span>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="label">Productivity score</div>
+        <div class="value">82%</div>
+        <div class="bar"><div class="bar-fill" style="width:82%; background:var(--blue);"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Habit streak</div>
+        <div class="value">12 days</div>
+        <div class="bar"><div class="bar-fill" style="width:60%; background:var(--green);"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Active goals</div>
+        <div class="value">4</div>
+        <div class="bar"><div class="bar-fill" style="width:50%; background:var(--purple);"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Backup status</div>
+        <div class="value" style="color:var(--green);">Synced</div>
+        <div class="bar"><div class="bar-fill" style="width:100%; background:var(--green);"></div></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="col">
+
+        <div class="card">
+          <div class="card-title">
+            <h3>Today's tasks</h3>
+            <button class="add-btn" id="addTask">+ Add</button>
+          </div>
+          <div id="taskList"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h3>Goal progress</h3></div>
+          <div id="goalList"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h3>Habit tracker</h3></div>
+          <div id="habitList"></div>
+        </div>
+
+      </div>
+
+      <div class="col">
+
+        <div class="card">
+          <div class="card-title"><h3>Upcoming reminders</h3><span class="icon">🔔</span></div>
+          <div class="reminder"><span>Pay electricity bill</span><span class="time">Today, 6:00 PM</span></div>
+          <div class="reminder"><span>Team review call</span><span class="time">Tomorrow, 10:00 AM</span></div>
+          <div class="reminder"><span>Amma's birthday</span><span class="time">In 3 days</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><h3>Finance snapshot</h3><span class="icon">💰</span></div>
+          <div class="finance-row"><span>Monthly budget</span><span>₹40,000</span></div>
+          <div class="finance-bar"><div class="finance-bar-fill" style="width:62%;"></div></div>
+          <div class="finance-note">₹24,800 spent of ₹40,000 (62%)</div>
+        </div>
+
+        <div class="ai-card">
+          <div class="ai-head">
+            <div class="ai-avatar">✦</div>
+            <h3 style="font-size:15px; font-weight:600;">AI insight</h3>
+          </div>
+          <p>You've completed 2 of 5 tasks today. Finishing "Structural drafting report" now keeps your 12-day streak alive.</p>
+          <button class="ai-btn" onclick="alert('AI Assistant: Here is your suggested plan for the rest of the day...')">Ask AI for today's plan</button>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  // Greeting based on time
+  const hour = new Date().getHours();
+  const greetText = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  document.getElementById('greetText').textContent = `${greetText}, Siva`;
+
+  // Theme toggle
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const themeLabel = document.getElementById('themeLabel');
+  let dark = false;
+  themeToggle.addEventListener('click', () => {
+    dark = !dark;
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    themeIcon.textContent = dark ? '☀' : '🌙';
+    themeLabel.textContent = dark ? 'Light mode' : 'Dark mode';
+  });
+
+  // Tasks
+  const tasks = [
+    {t:'Finish structural drafting report', done:false},
+    {t:'Reply to client email', done:true},
+    {t:'Update PEB market notes', done:false},
+    {t:'Gym session', done:true},
+    {t:'Review SGNT OS spec', done:false}
+  ];
+  const taskList = document.getElementById('taskList');
+  function renderTasks(){
+    taskList.innerHTML = '';
+    tasks.forEach((task,i)=>{
+      const row = document.createElement('div');
+      row.className = 'task' + (task.done ? ' done' : '');
+      row.innerHTML = `<input type="checkbox" ${task.done?'checked':''}><span>${task.t}</span>`;
+      row.querySelector('input').addEventListener('change', e=>{
+        tasks[i].done = e.target.checked;
+        renderTasks();
+      });
+      taskList.appendChild(row);
+    });
+  }
+  renderTasks();
+  document.getElementById('addTask').addEventListener('click', ()=>{
+    const name = prompt('New task name:');
+    if(name){ tasks.push({t:name, done:false}); renderTasks(); }
+  });
+
+  // Goals
+  const goals = [
+    {name:'Launch SGNT OS beta', pct:45, color:'var(--blue)'},
+    {name:'Read 12 books this year', pct:70, color:'var(--cyan)'},
+    {name:'Save ₹2,00,000', pct:30, color:'var(--amber)'},
+    {name:'Run 100km this month', pct:58, color:'var(--purple)'}
+  ];
+  const goalList = document.getElementById('goalList');
+  goals.forEach(g=>{
+    const div = document.createElement('div');
+    div.className = 'goal';
+    div.innerHTML = `
+      <div class="goal-head"><span>${g.name}</span><span>${g.pct}%</span></div>
+      <div class="goal-bar"><div class="goal-bar-fill" style="width:${g.pct}%; background:${g.color};"></div></div>`;
+    goalList.appendChild(div);
+  });
+
+  // Habits
+  const habits = [
+    {name:'Drink 2L water', streak:12, done:true},
+    {name:'Meditate 10 min', streak:5, done:false},
+    {name:'No late-night snacks', streak:8, done:true}
+  ];
+  const habitList = document.getElementById('habitList');
+  habits.forEach((h,i)=>{
+    const div = document.createElement('div');
+    div.className = 'habit';
+    div.innerHTML = `
+      <div class="habit-left">
+        <input type="checkbox" ${h.done?'checked':''}>
+        <span>${h.name}</span>
+      </div>
+      <span class="streak">${h.streak} day streak</span>`;
+    div.querySelector('input').addEventListener('change', e=>{ habits[i].done = e.target.checked; });
+    habitList.appendChild(div);
+  });
+</script>
+</body>
+</html>
